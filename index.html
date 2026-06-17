@@ -1,12 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-body {
-background-color: white; /* Ensure the iframe has a white background */
-}
+
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+							<style>
+								body {
+									background-color: white; /* Ensure the iframe has a white background */
+								}
 
 								
 							</style>
@@ -17,9 +18,8 @@ background-color: white; /* Ensure the iframe has a white background */
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PSIO 467 Grade Calculator</title>
+<title>PSIO 467 — Grade Calculator and Syllabus Chatbot</title>
 <style>
-  /* ── Reset & Base ── */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
@@ -101,14 +101,23 @@ background-color: white; /* Ensure the iframe has a white background */
 
   /* ── Main Grid ── */
   .bento-grid {
-    max-width: 1200px;
+    max-width: 1280px;
     margin: 32px auto 0;
     padding: 0 24px;
     display: grid;
     grid-template-columns: repeat(12, 1fr);
-    grid-template-rows: auto;
     gap: 20px;
   }
+
+  /* ── Grid placement ──
+     Top row:    Exams (col 1-4) | Assignments (col 5-8) | Current Standing (col 9-13)
+     Bottom row: Grade Scale (col 1-4) | Target Calculator (col 5-13)
+  ── */
+  .card-exams    { grid-column: 1 / 5;  grid-row: 1; }
+  .card-assigns  { grid-column: 5 / 9;  grid-row: 1; }
+  .card-current  { grid-column: 9 / 13; grid-row: 1; }
+  .card-scale    { grid-column: 1 / 5;  grid-row: 2; }
+  .card-target   { grid-column: 5 / 13; grid-row: 2; }
 
   /* ── Cards ── */
   .card {
@@ -121,12 +130,6 @@ background-color: white; /* Ensure the iframe has a white background */
     overflow: hidden;
   }
   .card:hover { box-shadow: var(--shadow-hover); }
-
-  .card-exams    { grid-column: 1 / 7; }
-  .card-assigns  { grid-column: 7 / 13; }
-  .card-scale    { grid-column: 1 / 5; }
-  .card-current  { grid-column: 5 / 13; }
-  .card-target   { grid-column: 1 / 13; }
 
   /* ── Card Headers ── */
   .card-header {
@@ -144,10 +147,10 @@ background-color: white; /* Ensure the iframe has a white background */
     font-size: 18px;
     flex-shrink: 0;
   }
-  .icon-red   { background: rgba(171,5,32,0.10); }
-  .icon-blue  { background: rgba(12,35,75,0.08); }
-  .icon-sky   { background: var(--sky-light); }
-  .icon-leaf  { background: var(--leaf-light); }
+  .icon-red  { background: rgba(171,5,32,0.10); }
+  .icon-blue { background: rgba(12,35,75,0.08); }
+  .icon-sky  { background: var(--sky-light); }
+  .icon-leaf { background: var(--leaf-light); }
 
   .card-header h2 {
     font-size: 1.05rem;
@@ -169,36 +172,36 @@ background-color: white; /* Ensure the iframe has a white background */
     flex-direction: column;
     gap: 14px;
   }
-
   .score-row {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 12px;
   }
   .score-label {
     flex: 1;
-    font-size: 0.88rem;
+    font-size: 0.85rem;
     font-weight: 600;
     color: var(--text-mid);
+    min-width: 0;
   }
   .score-label small {
     display: block;
-    font-size: 0.72rem;
+    font-size: 0.70rem;
     font-weight: 400;
     color: var(--silver);
     margin-top: 1px;
   }
-
   .input-wrap {
     position: relative;
-    width: 110px;
+    width: 100px;
+    flex-shrink: 0;
   }
   .input-wrap input[type="number"] {
     width: 100%;
-    padding: 9px 38px 9px 12px;
+    padding: 9px 34px 9px 10px;
     border: 2px solid var(--silver-light);
     border-radius: var(--radius-sm);
-    font-size: 0.95rem;
+    font-size: 0.92rem;
     font-weight: 600;
     color: var(--text-dark);
     background: var(--sand);
@@ -219,15 +222,14 @@ background-color: white; /* Ensure the iframe has a white background */
   }
   .input-max {
     position: absolute;
-    right: 8px; top: 50%;
+    right: 7px; top: 50%;
     transform: translateY(-50%);
-    font-size: 0.68rem;
+    font-size: 0.65rem;
     color: var(--silver);
     font-weight: 600;
     pointer-events: none;
     user-select: none;
   }
-
   .score-bar-wrap {
     flex: 1;
     height: 6px;
@@ -268,73 +270,71 @@ background-color: white; /* Ensure the iframe has a white background */
     font-weight: 800;
     font-size: 1rem;
     flex-shrink: 0;
-    letter-spacing: -0.5px;
   }
   .scale-range {
     font-size: 0.82rem;
     color: var(--text-mid);
     font-weight: 500;
+    flex: 1;
   }
   .scale-bar-wrap {
-    flex: 1;
+    width: 60px;
     height: 5px;
     background: var(--silver-light);
     border-radius: 99px;
     overflow: hidden;
+    flex-shrink: 0;
   }
   .scale-bar { height: 100%; border-radius: 99px; }
 
-  /* Grade colors */
-  .grade-A .scale-badge  { background: #D4EDD1; color: #2D7A27; }
-  .grade-A .scale-bar    { background: #70B865; width: 100%; }
-  .grade-A.active-grade  { background: #D4EDD1; }
-  .grade-B .scale-badge  { background: #C7EAF6; color: #1565A0; }
-  .grade-B .scale-bar    { background: #81D3EB; width: 88%; }
-  .grade-B.active-grade  { background: #C7EAF6; }
-  .grade-C .scale-badge  { background: #FFF3CC; color: #8B6914; }
-  .grade-C .scale-bar    { background: #F4C842; width: 74%; }
-  .grade-C.active-grade  { background: #FFF3CC; }
-  .grade-D .scale-badge  { background: #FFE5CC; color: #A0521A; }
-  .grade-D .scale-bar    { background: #F4A042; width: 64%; }
-  .grade-D.active-grade  { background: #FFE5CC; }
-  .grade-E .scale-badge  { background: #FFD9DE; color: var(--az-red); }
-  .grade-E .scale-bar    { background: var(--bloom); width: 50%; }
-  .grade-E.active-grade  { background: #FFD9DE; }
+  .grade-A .scale-badge { background: #D4EDD1; color: #2D7A27; }
+  .grade-A .scale-bar   { background: #70B865; width: 100%; }
+  .grade-A.active-grade { background: #D4EDD1; }
+  .grade-B .scale-badge { background: #C7EAF6; color: #1565A0; }
+  .grade-B .scale-bar   { background: #81D3EB; width: 88%; }
+  .grade-B.active-grade { background: #C7EAF6; }
+  .grade-C .scale-badge { background: #FFF3CC; color: #8B6914; }
+  .grade-C .scale-bar   { background: #F4C842; width: 74%; }
+  .grade-C.active-grade { background: #FFF3CC; }
+  .grade-D .scale-badge { background: #FFE5CC; color: #A0521A; }
+  .grade-D .scale-bar   { background: #F4A042; width: 64%; }
+  .grade-D.active-grade { background: #FFE5CC; }
+  .grade-E .scale-badge { background: #FFD9DE; color: var(--az-red); }
+  .grade-E .scale-bar   { background: var(--bloom); width: 50%; }
+  .grade-E.active-grade { background: #FFD9DE; }
 
-  /* ── Current Stats Card ── */
+  /* ── Current Standing Card ── */
   .stats-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
   }
   .stat-box {
     border-radius: var(--radius-md);
-    padding: 16px 14px;
+    padding: 14px 12px;
     text-align: center;
     transition: var(--transition);
   }
   .stat-box .stat-value {
-    font-size: 1.75rem;
+    font-size: 1.55rem;
     font-weight: 800;
     line-height: 1;
     margin-bottom: 5px;
     letter-spacing: -0.5px;
   }
   .stat-box .stat-label {
-    font-size: 0.72rem;
+    font-size: 0.68rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.6px;
     opacity: 0.75;
     line-height: 1.3;
   }
-
   .stat-earned  { background: var(--leaf-light); color: #2D7A27; }
   .stat-attempt { background: rgba(12,35,75,0.06); color: var(--az-blue); }
-  .stat-percent { background: var(--sky-light);  color: #1565A0; }
+  .stat-percent { background: var(--sky-light); color: #1565A0; }
   .stat-letter  { background: rgba(171,5,32,0.08); color: var(--az-red); }
-
-  .stat-letter .stat-value { font-size: 2.4rem; }
+  .stat-letter .stat-value { font-size: 2.1rem; }
 
   .stat-letter.letter-A { background: #D4EDD1; color: #2D7A27; }
   .stat-letter.letter-B { background: #C7EAF6; color: #1565A0; }
@@ -342,14 +342,13 @@ background-color: white; /* Ensure the iframe has a white background */
   .stat-letter.letter-D { background: #FFE5CC; color: #A0521A; }
   .stat-letter.letter-E { background: #FFD9DE; color: var(--az-red); }
 
-  /* Progress arc section */
   .progress-section {
-    margin-top: 18px;
-    padding-top: 16px;
+    margin-top: 16px;
+    padding-top: 14px;
     border-top: 2px solid var(--silver-light);
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 10px;
   }
   .progress-bar-full {
     flex: 1;
@@ -366,7 +365,7 @@ background-color: white; /* Ensure the iframe has a white background */
     width: 0%;
   }
   .progress-label {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 600;
     color: var(--text-mid);
     white-space: nowrap;
@@ -377,9 +376,7 @@ background-color: white; /* Ensure the iframe has a white background */
     background: linear-gradient(135deg, var(--az-blue) 0%, var(--az-blue-mid) 100%);
     color: var(--white);
   }
-  .card-target .card-header {
-    border-bottom-color: rgba(255,255,255,0.15);
-  }
+  .card-target .card-header { border-bottom-color: rgba(255,255,255,0.15); }
   .card-target .card-header h2 { color: var(--white); }
   .card-target .card-header .subtitle { color: rgba(255,255,255,0.55); }
 
@@ -397,16 +394,19 @@ background-color: white; /* Ensure the iframe has a white background */
   .target-hidden-msg p { font-size: 0.88rem; max-width: 340px; line-height: 1.5; }
 
   .target-content { display: none; }
-  .target-content.visible { display: block; }
-  .target-hidden { display: flex; }
-  .target-hidden.hidden { display: none; }
+  .target-hidden  { display: flex; }
 
-  /* Grade Selector */
   .grade-selector {
     display: flex;
     gap: 10px;
     margin-bottom: 22px;
     flex-wrap: wrap;
+    align-items: center;
+  }
+  .grade-selector-label {
+    font-size: 0.82rem;
+    opacity: 0.65;
+    margin-right: 4px;
   }
   .grade-btn {
     padding: 9px 22px;
@@ -432,14 +432,12 @@ background-color: white; /* Ensure the iframe has a white background */
     box-shadow: 0 3px 12px rgba(171,5,32,0.5);
   }
 
-  /* Target result display */
   .target-result {
     display: grid;
     grid-template-columns: 1fr auto;
     gap: 20px;
     align-items: center;
   }
-  .target-info {}
   .target-info .target-headline {
     font-size: 0.82rem;
     text-transform: uppercase;
@@ -461,7 +459,7 @@ background-color: white; /* Ensure the iframe has a white background */
     border-radius: var(--radius-md);
     padding: 18px 24px;
     text-align: center;
-    min-width: 130px;
+    min-width: 140px;
   }
   .target-score-box .tsb-value {
     font-size: 2.8rem;
@@ -476,9 +474,9 @@ background-color: white; /* Ensure the iframe has a white background */
     opacity: 0.6;
     margin-top: 4px;
   }
-  .tsb-achievable  { border-color: var(--leaf); background: rgba(112,184,101,0.15); }
-  .tsb-impossible  { border-color: var(--bloom); background: rgba(239,64,86,0.15); }
-  .tsb-guaranteed  { border-color: var(--sky); background: rgba(129,211,235,0.15); }
+  .tsb-achievable { border-color: var(--leaf);  background: rgba(112,184,101,0.15); }
+  .tsb-impossible { border-color: var(--bloom); background: rgba(239,64,86,0.15); }
+  .tsb-guaranteed { border-color: var(--sky);   background: rgba(129,211,235,0.15); }
 
   .target-status-bar {
     margin-top: 16px;
@@ -494,38 +492,42 @@ background-color: white; /* Ensure the iframe has a white background */
   .status-impossible { background: rgba(239,64,86,0.2);  color: #FFAAB5; }
   .status-guaranteed { background: rgba(129,211,235,0.2); color: var(--sky); }
 
-  /* ── Utility / Misc ── */
-  .placeholder-dash {
-    color: var(--silver);
-    font-weight: 700;
-  }
+  /* ── Utility ── */
+  .placeholder-dash { color: var(--silver); font-weight: 700; }
 
-  /* Focus visible for a11y */
   :focus-visible {
     outline: 3px solid var(--az-red);
     outline-offset: 2px;
   }
 
   /* ── Responsive ── */
-  @media (max-width: 900px) {
-    .bento-grid { grid-template-columns: repeat(6, 1fr); gap: 16px; padding: 0 16px; }
-    .card-exams   { grid-column: 1 / 7; }
-    .card-assigns { grid-column: 1 / 7; }
-    .card-scale   { grid-column: 1 / 7; }
-    .card-current { grid-column: 1 / 7; }
-    .card-target  { grid-column: 1 / 7; }
-    .stats-grid   { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 1024px) {
+    .bento-grid { grid-template-columns: repeat(6, 1fr); }
+    .card-exams   { grid-column: 1 / 4; grid-row: 1; }
+    .card-assigns { grid-column: 4 / 7; grid-row: 1; }
+    .card-current { grid-column: 1 / 7; grid-row: 2; }
+    .card-scale   { grid-column: 1 / 3; grid-row: 3; }
+    .card-target  { grid-column: 3 / 7; grid-row: 3; }
+    .stats-grid   { grid-template-columns: repeat(4, 1fr); }
   }
 
-  @media (max-width: 600px) {
-    header { padding: 20px 18px; gap: 12px; }
-    header h1 { font-size: 1.25rem; }
-    .bento-grid { margin-top: 20px; gap: 14px; padding: 0 12px; }
-    .card { padding: 18px 16px; }
-    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  @media (max-width: 768px) {
+    .bento-grid { grid-template-columns: 1fr; gap: 16px; padding: 0 16px; }
+    .card-exams   { grid-column: 1; grid-row: auto; }
+    .card-assigns { grid-column: 1; grid-row: auto; }
+    .card-current { grid-column: 1; grid-row: auto; }
+    .card-scale   { grid-column: 1; grid-row: auto; }
+    .card-target  { grid-column: 1; grid-row: auto; }
+    .stats-grid   { grid-template-columns: repeat(2, 1fr); }
     .target-result { grid-template-columns: 1fr; }
     .target-score-box { min-width: unset; }
-    .grade-selector { gap: 8px; }
+  }
+
+  @media (max-width: 480px) {
+    header { padding: 20px 18px; gap: 12px; }
+    header h1 { font-size: 1.1rem; }
+    .bento-grid { margin-top: 20px; gap: 14px; padding: 0 12px; }
+    .card { padding: 18px 16px; }
     .grade-btn { padding: 8px 16px; font-size: 0.85rem; }
   }
 </style>
@@ -536,7 +538,7 @@ background-color: white; /* Ensure the iframe has a white background */
 <header>
   <div class="header-logo" aria-hidden="true">🎓</div>
   <div class="header-text">
-    <h1>PSIO 467 Grade Calculator</h1>
+    <h1>PSIO 467 — Grade Calculator and Syllabus Chatbot</h1>
     <p>Track your progress · Target your final grade · University of Arizona</p>
   </div>
 </header>
@@ -544,7 +546,7 @@ background-color: white; /* Ensure the iframe has a white background */
 <!-- ══════════ BENTO GRID ══════════ -->
 <main class="bento-grid" role="main">
 
-  <!-- ── CARD 1: Exam Scores ── -->
+  <!-- ── TOP ROW LEFT: Exam Scores ── -->
   <section class="card card-exams" aria-label="Exam Scores">
     <div class="card-header">
       <div class="card-icon icon-red" aria-hidden="true">📝</div>
@@ -556,9 +558,7 @@ background-color: white; /* Ensure the iframe has a white background */
     <div class="score-grid" role="form" aria-label="Exam score inputs">
 
       <div class="score-row">
-        <div class="score-label">
-          Exam 1<small>Max: 100 pts (+ EC)</small>
-        </div>
+        <div class="score-label">Exam 1<small>Max: 100 pts (+ EC)</small></div>
         <div class="input-wrap">
           <input type="number" id="exam1" min="0" step="0.1" placeholder="—"
                  aria-label="Exam 1 score" onchange="calculate()" oninput="handleInput(this,'exam')">
@@ -570,9 +570,7 @@ background-color: white; /* Ensure the iframe has a white background */
       </div>
 
       <div class="score-row">
-        <div class="score-label">
-          Exam 2<small>Max: 100 pts (+ EC)</small>
-        </div>
+        <div class="score-label">Exam 2<small>Max: 100 pts (+ EC)</small></div>
         <div class="input-wrap">
           <input type="number" id="exam2" min="0" step="0.1" placeholder="—"
                  aria-label="Exam 2 score" onchange="calculate()" oninput="handleInput(this,'exam')">
@@ -584,9 +582,7 @@ background-color: white; /* Ensure the iframe has a white background */
       </div>
 
       <div class="score-row">
-        <div class="score-label">
-          Exam 3<small>Max: 100 pts (+ EC)</small>
-        </div>
+        <div class="score-label">Exam 3<small>Max: 100 pts (+ EC)</small></div>
         <div class="input-wrap">
           <input type="number" id="exam3" min="0" step="0.1" placeholder="—"
                  aria-label="Exam 3 score" onchange="calculate()" oninput="handleInput(this,'exam')">
@@ -600,7 +596,7 @@ background-color: white; /* Ensure the iframe has a white background */
     </div>
   </section>
 
-  <!-- ── CARD 2: Assignment Scores ── -->
+  <!-- ── TOP ROW MIDDLE: Assignment Scores ── -->
   <section class="card card-assigns" aria-label="Assignment Scores">
     <div class="card-header">
       <div class="card-icon icon-blue" aria-hidden="true">📋</div>
@@ -612,9 +608,7 @@ background-color: white; /* Ensure the iframe has a white background */
     <div class="score-grid" role="form" aria-label="Assignment score inputs">
 
       <div class="score-row">
-        <div class="score-label">
-          Assignment 1<small>Max: 25 pts</small>
-        </div>
+        <div class="score-label">Assignment 1<small>Max: 25 pts</small></div>
         <div class="input-wrap">
           <input type="number" id="assign1" min="0" max="25" step="0.1" placeholder="—"
                  aria-label="Assignment 1 score" onchange="calculate()" oninput="handleInput(this,'assign')">
@@ -626,9 +620,7 @@ background-color: white; /* Ensure the iframe has a white background */
       </div>
 
       <div class="score-row">
-        <div class="score-label">
-          Assignment 2<small>Max: 25 pts</small>
-        </div>
+        <div class="score-label">Assignment 2<small>Max: 25 pts</small></div>
         <div class="input-wrap">
           <input type="number" id="assign2" min="0" max="25" step="0.1" placeholder="—"
                  aria-label="Assignment 2 score" onchange="calculate()" oninput="handleInput(this,'assign')">
@@ -640,9 +632,7 @@ background-color: white; /* Ensure the iframe has a white background */
       </div>
 
       <div class="score-row">
-        <div class="score-label">
-          Assignment 3<small>Max: 25 pts</small>
-        </div>
+        <div class="score-label">Assignment 3<small>Max: 25 pts</small></div>
         <div class="input-wrap">
           <input type="number" id="assign3" min="0" max="25" step="0.1" placeholder="—"
                  aria-label="Assignment 3 score" onchange="calculate()" oninput="handleInput(this,'assign')">
@@ -654,9 +644,7 @@ background-color: white; /* Ensure the iframe has a white background */
       </div>
 
       <div class="score-row">
-        <div class="score-label">
-          Assignment 4<small>Max: 25 pts</small>
-        </div>
+        <div class="score-label">Assignment 4<small>Max: 25 pts</small></div>
         <div class="input-wrap">
           <input type="number" id="assign4" min="0" max="25" step="0.1" placeholder="—"
                  aria-label="Assignment 4 score" onchange="calculate()" oninput="handleInput(this,'assign')">
@@ -670,51 +658,7 @@ background-color: white; /* Ensure the iframe has a white background */
     </div>
   </section>
 
-  <!-- ── CARD 3: Grade Scale ── -->
-  <section class="card card-scale" aria-label="Letter Grade Scale">
-    <div class="card-header">
-      <div class="card-icon icon-sky" aria-hidden="true">📊</div>
-      <div>
-        <h2>Grade Scale</h2>
-        <span class="subtitle">Letter grade thresholds</span>
-      </div>
-    </div>
-    <div class="scale-list" role="list" aria-label="Grade scale">
-
-      <div class="scale-row grade-A" id="scale-A" role="listitem">
-        <div class="scale-badge" aria-label="Grade A">A</div>
-        <div class="scale-range">90.0% – 100%</div>
-        <div class="scale-bar-wrap" aria-hidden="true"><div class="scale-bar"></div></div>
-      </div>
-
-      <div class="scale-row grade-B" id="scale-B" role="listitem">
-        <div class="scale-badge" aria-label="Grade B">B</div>
-        <div class="scale-range">80.0% – 89.9%</div>
-        <div class="scale-bar-wrap" aria-hidden="true"><div class="scale-bar"></div></div>
-      </div>
-
-      <div class="scale-row grade-C" id="scale-C" role="listitem">
-        <div class="scale-badge" aria-label="Grade C">C</div>
-        <div class="scale-range">70.0% – 79.9%</div>
-        <div class="scale-bar-wrap" aria-hidden="true"><div class="scale-bar"></div></div>
-      </div>
-
-      <div class="scale-row grade-D" id="scale-D" role="listitem">
-        <div class="scale-badge" aria-label="Grade D">D</div>
-        <div class="scale-range">60.0% – 69.9%</div>
-        <div class="scale-bar-wrap" aria-hidden="true"><div class="scale-bar"></div></div>
-      </div>
-
-      <div class="scale-row grade-E" id="scale-E" role="listitem">
-        <div class="scale-badge" aria-label="Grade E">E</div>
-        <div class="scale-range">59.9% or below</div>
-        <div class="scale-bar-wrap" aria-hidden="true"><div class="scale-bar"></div></div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ── CARD 4: Current Stats ── -->
+  <!-- ── TOP ROW RIGHT: Current Standing ── -->
   <section class="card card-current" aria-label="Current Grade Summary">
     <div class="card-header">
       <div class="card-icon icon-leaf" aria-hidden="true">📈</div>
@@ -744,7 +688,7 @@ background-color: white; /* Ensure the iframe has a white background */
     </div>
 
     <div class="progress-section" aria-label="Grade progress">
-      <span class="progress-label" id="progress-label">Enter scores to begin</span>
+      <span class="progress-label" id="progress-label">Enter scores</span>
       <div class="progress-bar-full" role="progressbar"
            aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
            aria-label="Grade progress bar" id="progress-bar-wrap">
@@ -754,7 +698,47 @@ background-color: white; /* Ensure the iframe has a white background */
     </div>
   </section>
 
-  <!-- ── CARD 5: Target Grade ── -->
+  <!-- ── BOTTOM ROW LEFT: Grade Scale ── -->
+  <section class="card card-scale" aria-label="Letter Grade Scale">
+    <div class="card-header">
+      <div class="card-icon icon-sky" aria-hidden="true">📊</div>
+      <div>
+        <h2>Grade Scale</h2>
+        <span class="subtitle">Letter grade thresholds</span>
+      </div>
+    </div>
+    <div class="scale-list" role="list" aria-label="Grade scale">
+
+      <div class="scale-row grade-A" id="scale-A" role="listitem">
+        <div class="scale-badge" aria-label="Grade A">A</div>
+        <div class="scale-range">90.0% – 100%</div>
+        <div class="scale-bar-wrap" aria-hidden="true"><div class="scale-bar"></div></div>
+      </div>
+      <div class="scale-row grade-B" id="scale-B" role="listitem">
+        <div class="scale-badge" aria-label="Grade B">B</div>
+        <div class="scale-range">80.0% – 89.9%</div>
+        <div class="scale-bar-wrap" aria-hidden="true"><div class="scale-bar"></div></div>
+      </div>
+      <div class="scale-row grade-C" id="scale-C" role="listitem">
+        <div class="scale-badge" aria-label="Grade C">C</div>
+        <div class="scale-range">70.0% – 79.9%</div>
+        <div class="scale-bar-wrap" aria-hidden="true"><div class="scale-bar"></div></div>
+      </div>
+      <div class="scale-row grade-D" id="scale-D" role="listitem">
+        <div class="scale-badge" aria-label="Grade D">D</div>
+        <div class="scale-range">60.0% – 69.9%</div>
+        <div class="scale-bar-wrap" aria-hidden="true"><div class="scale-bar"></div></div>
+      </div>
+      <div class="scale-row grade-E" id="scale-E" role="listitem">
+        <div class="scale-badge" aria-label="Grade E">E</div>
+        <div class="scale-range">59.9% or below</div>
+        <div class="scale-bar-wrap" aria-hidden="true"><div class="scale-bar"></div></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── BOTTOM ROW RIGHT: Target Grade ── -->
   <section class="card card-target" aria-label="Target Grade Calculator">
     <div class="card-header">
       <div class="card-icon" style="background:rgba(255,255,255,0.12)" aria-hidden="true">🎯</div>
@@ -764,7 +748,6 @@ background-color: white; /* Ensure the iframe has a white background */
       </div>
     </div>
 
-    <!-- Hidden state -->
     <div class="target-hidden" id="target-hidden" aria-live="polite">
       <div class="target-hidden-msg">
         <span class="lock-icon" aria-hidden="true">🔒</span>
@@ -772,12 +755,9 @@ background-color: white; /* Ensure the iframe has a white background */
       </div>
     </div>
 
-    <!-- Visible state -->
     <div class="target-content" id="target-content">
-
-      <!-- Grade selector -->
       <div class="grade-selector" role="group" aria-label="Select target grade">
-        <span style="font-size:0.82rem;opacity:0.65;align-self:center;margin-right:4px;">I want to earn:</span>
+        <span class="grade-selector-label">I want to earn:</span>
         <button class="grade-btn active" data-grade="A" onclick="selectGrade('A')" aria-pressed="true">A</button>
         <button class="grade-btn" data-grade="B" onclick="selectGrade('B')" aria-pressed="false">B</button>
         <button class="grade-btn" data-grade="C" onclick="selectGrade('C')" aria-pressed="false">C</button>
@@ -785,16 +765,11 @@ background-color: white; /* Ensure the iframe has a white background */
         <button class="grade-btn" data-grade="E" onclick="selectGrade('E')" aria-pressed="false">E</button>
       </div>
 
-      <!-- Result display -->
       <div class="target-result">
         <div class="target-info">
           <div class="target-headline">Exam 4 score needed</div>
-          <div id="target-main-text" style="font-size:1.15rem;font-weight:700;line-height:1.3;">
-            Calculating…
-          </div>
-          <div class="target-equation" id="target-equation">
-            &nbsp;
-          </div>
+          <div id="target-main-text" style="font-size:1.15rem;font-weight:700;line-height:1.3;">Calculating…</div>
+          <div class="target-equation" id="target-equation">&nbsp;</div>
         </div>
         <div class="target-score-box" id="target-score-box">
           <div class="tsb-value" id="target-score-value">—</div>
@@ -806,7 +781,6 @@ background-color: white; /* Ensure the iframe has a white background */
         <span id="target-status-icon">ℹ️</span>
         <span id="target-status-text">Select a target grade above.</span>
       </div>
-
     </div>
   </section>
 
@@ -814,21 +788,16 @@ background-color: white; /* Ensure the iframe has a white background */
 
 <!-- ══════════ JAVASCRIPT ══════════ -->
 <script>
-(function() {
+(function () {
   'use strict';
 
-  /* ── Course structure ─────────────────────────── */
-  // Total possible points: 4 exams × 100 + 4 assignments × 25 = 500
   const EXAM_MAX   = 100;
   const ASSIGN_MAX = 25;
   const TOTAL_MAX  = 4 * EXAM_MAX + 4 * ASSIGN_MAX; // 500
-
-  /* Grade thresholds (minimum % needed) */
   const THRESHOLDS = { A: 90.0, B: 80.0, C: 70.0, D: 60.0, E: 0 };
 
   let selectedGrade = 'A';
 
-  /* ── Helpers ────────────────────────────────────── */
   function getVal(id) {
     const v = parseFloat(document.getElementById(id).value);
     return isNaN(v) ? null : v;
@@ -849,31 +818,27 @@ background-color: white; /* Ensure the iframe has a white background */
 
   function barWidth(score, max) {
     if (score === null) return 0;
-    const pct = Math.min((score / max) * 100, 115); // allow a little over for EC
-    return Math.max(0, pct);
+    return Math.max(0, Math.min((score / max) * 100, 115));
   }
 
-  /* ── Input handler: style on entry ─────────────── */
-  window.handleInput = function(input, type) {
-    const max = (type === 'exam') ? EXAM_MAX : ASSIGN_MAX;
+  window.handleInput = function (input, type) {
     if (input.value !== '' && !isNaN(parseFloat(input.value))) {
       input.classList.add('has-value');
     } else {
       input.classList.remove('has-value');
     }
-    // Update bar
-    const id = input.id;
     const barMap = {
-      exam1:'bar-exam1', exam2:'bar-exam2', exam3:'bar-exam3',
-      assign1:'bar-assign1', assign2:'bar-assign2', assign3:'bar-assign3', assign4:'bar-assign4'
+      exam1: 'bar-exam1', exam2: 'bar-exam2', exam3: 'bar-exam3',
+      assign1: 'bar-assign1', assign2: 'bar-assign2',
+      assign3: 'bar-assign3', assign4: 'bar-assign4'
     };
-    const bar = document.getElementById(barMap[id]);
-    if (bar) bar.style.width = barWidth(getVal(id), max) + '%';
+    const max = (type === 'exam') ? EXAM_MAX : ASSIGN_MAX;
+    const bar = document.getElementById(barMap[input.id]);
+    if (bar) bar.style.width = barWidth(getVal(input.id), max) + '%';
     calculate();
   };
 
-  /* ── Grade selector ─────────────────────────────── */
-  window.selectGrade = function(grade) {
+  window.selectGrade = function (grade) {
     selectedGrade = grade;
     document.querySelectorAll('.grade-btn').forEach(btn => {
       const isActive = btn.dataset.grade === grade;
@@ -883,80 +848,60 @@ background-color: white; /* Ensure the iframe has a white background */
     calculate();
   };
 
-  /* ── Highlight active grade in scale ───────────── */
   function highlightScale(letter) {
-    ['A','B','C','D','E'].forEach(g => {
+    ['A', 'B', 'C', 'D', 'E'].forEach(g => {
       const row = document.getElementById('scale-' + g);
       if (row) row.classList.toggle('active-grade', g === letter);
     });
   }
 
-  /* ── Main calculate function ────────────────────── */
-  window.calculate = function() {
-    // Read values
+  window.calculate = function () {
     const e1 = getVal('exam1'), e2 = getVal('exam2'), e3 = getVal('exam3');
     const a1 = getVal('assign1'), a2 = getVal('assign2');
     const a3 = getVal('assign3'), a4 = getVal('assign4');
 
-    /* ── Current Standing ── */
-    const scores    = [e1, e2, e3, a1, a2, a3, a4];
-    const maxPts    = [EXAM_MAX, EXAM_MAX, EXAM_MAX, ASSIGN_MAX, ASSIGN_MAX, ASSIGN_MAX, ASSIGN_MAX];
-    let   earned    = 0;
-    let   attempted = 0;
+    const scores = [e1, e2, e3, a1, a2, a3, a4];
+    const maxPts = [EXAM_MAX, EXAM_MAX, EXAM_MAX, ASSIGN_MAX, ASSIGN_MAX, ASSIGN_MAX, ASSIGN_MAX];
+    let earned = 0, attempted = 0;
 
     scores.forEach((s, i) => {
-      if (s !== null) {
-        earned    += s;
-        attempted += maxPts[i];
-      }
+      if (s !== null) { earned += s; attempted += maxPts[i]; }
     });
 
-    const hasAny  = attempted > 0;
-    const pct     = hasAny ? (earned / attempted) * 100 : null;
-    const letter  = pct !== null ? gradeFromPct(pct) : null;
+    const hasAny = attempted > 0;
+    const pct    = hasAny ? (earned / attempted) * 100 : null;
+    const letter = pct !== null ? gradeFromPct(pct) : null;
 
-    // Update stat boxes
-    const earnEl    = document.getElementById('stat-earned');
-    const attEl     = document.getElementById('stat-attempted');
-    const pctEl     = document.getElementById('stat-percent');
-    const letEl     = document.getElementById('stat-letter');
-    const letBox    = document.getElementById('stat-letter-box');
+    document.getElementById('stat-earned').innerHTML    = hasAny ? `<span>${fmt(earned, 1)}</span>` : `<span class="placeholder-dash">—</span>`;
+    document.getElementById('stat-attempted').innerHTML = hasAny ? `<span>${attempted}</span>` : `<span class="placeholder-dash">—</span>`;
+    document.getElementById('stat-percent').innerHTML   = pct !== null ? `<span>${fmt(pct, 1)}%</span>` : `<span class="placeholder-dash">—</span>`;
+    document.getElementById('stat-letter').innerHTML    = letter ? `<span>${letter}</span>` : `<span class="placeholder-dash">—</span>`;
 
-    earnEl.innerHTML    = hasAny ? `<span>${fmt(earned,1)}</span>` : `<span class="placeholder-dash">—</span>`;
-    attEl.innerHTML     = hasAny ? `<span>${attempted}</span>` : `<span class="placeholder-dash">—</span>`;
-    pctEl.innerHTML     = pct !== null ? `<span>${fmt(pct,1)}%</span>` : `<span class="placeholder-dash">—</span>`;
-    letEl.innerHTML     = letter ? `<span>${letter}</span>` : `<span class="placeholder-dash">—</span>`;
-
-    // Color letter box
+    const letBox = document.getElementById('stat-letter-box');
     letBox.className = 'stat-box stat-letter' + (letter ? ' letter-' + letter : '');
 
-    // Progress bar
     const fill  = document.getElementById('progress-fill');
     const lbl   = document.getElementById('progress-label');
     const pLbl  = document.getElementById('progress-pct-label');
     const pWrap = document.getElementById('progress-bar-wrap');
 
     if (pct !== null) {
-      const clampedPct = Math.min(pct, 100);
-      fill.style.width = clampedPct + '%';
+      fill.style.width = Math.min(pct, 100) + '%';
       pLbl.textContent = fmt(pct, 1) + '%';
-      lbl.textContent  = 'Overall performance';
-      pWrap.setAttribute('aria-valuenow', Math.round(clampedPct));
-      // Color the bar by grade
-      const colors = { A:'#70B865', B:'#81D3EB', C:'#F4C842', D:'#F4A042', E:'#EF4056' };
+      lbl.textContent  = 'Performance';
+      pWrap.setAttribute('aria-valuenow', Math.round(Math.min(pct, 100)));
+      const colors = { A: '#70B865', B: '#81D3EB', C: '#F4C842', D: '#F4A042', E: '#EF4056' };
       fill.style.background = colors[letter] || '#EF4056';
     } else {
-      fill.style.width = '0%';
-      pLbl.textContent = '0%';
-      lbl.textContent  = 'Enter scores to begin';
+      fill.style.width  = '0%';
+      pLbl.textContent  = '0%';
+      lbl.textContent   = 'Enter scores';
       pWrap.setAttribute('aria-valuenow', 0);
       fill.style.background = 'linear-gradient(90deg, var(--az-red), var(--bloom))';
     }
 
-    // Highlight scale
     highlightScale(letter);
 
-    /* ── Target Grade Section ── */
     const allEntered = (e1 !== null && e2 !== null && e3 !== null &&
                         a1 !== null && a2 !== null && a3 !== null && a4 !== null);
 
@@ -964,74 +909,49 @@ background-color: white; /* Ensure the iframe has a white background */
     const contentEl = document.getElementById('target-content');
 
     if (!allEntered) {
-      hiddenEl.classList.remove('hidden');
-      hiddenEl.style.display = 'flex';
-      contentEl.classList.remove('visible');
+      hiddenEl.style.display  = 'flex';
       contentEl.style.display = 'none';
       return;
     }
 
-    // Show target section
-    hiddenEl.classList.add('hidden');
-    hiddenEl.style.display = 'none';
-    contentEl.classList.add('visible');
+    hiddenEl.style.display  = 'none';
     contentEl.style.display = 'block';
-
     computeTarget(e1, e2, e3, a1, a2, a3, a4);
   };
 
-  /* ── Compute target exam 4 score ───────────────── */
   function computeTarget(e1, e2, e3, a1, a2, a3, a4) {
     const threshold = THRESHOLDS[selectedGrade];
+    const soFar     = e1 + e2 + e3 + a1 + a2 + a3 + a4;
 
-    // Points earned so far (without exam 4)
-    const soFar = e1 + e2 + e3 + a1 + a2 + a3 + a4;
+    const mainTextEl = document.getElementById('target-main-text');
+    const eqEl       = document.getElementById('target-equation');
+    const scoreBox   = document.getElementById('target-score-box');
+    const scoreVal   = document.getElementById('target-score-value');
+    const statusBar  = document.getElementById('target-status-bar');
+    const statusIcon = document.getElementById('target-status-icon');
+    const statusText = document.getElementById('target-status-text');
 
-    // Total possible with exam 4 included
-    // total = soFar + exam4
-    // final % = total / TOTAL_MAX * 100 >= threshold
-    // exam4 >= (threshold/100 * TOTAL_MAX) - soFar
-
-    const needed = (threshold / 100) * TOTAL_MAX - soFar;
-
-    const mainTextEl  = document.getElementById('target-main-text');
-    const eqEl        = document.getElementById('target-equation');
-    const scoreBox    = document.getElementById('target-score-box');
-    const scoreVal    = document.getElementById('target-score-value');
-    const statusBar   = document.getElementById('target-status-bar');
-    const statusIcon  = document.getElementById('target-status-icon');
-    const statusText  = document.getElementById('target-status-text');
-
-    // Reset classes
-    scoreBox.className = 'target-score-box';
+    scoreBox.className  = 'target-score-box';
     statusBar.className = 'target-status-bar';
 
-    const gradeLabel = { A:'an A', B:'a B', C:'a C', D:'a D', E:'an E (any score)' };
+    const gradeLabel = { A: 'an A', B: 'a B', C: 'a C', D: 'a D', E: 'an E' };
 
     if (selectedGrade === 'E') {
-      // You can always fail — needs < 60%
-      // Actually E means ≤ 59.9%, so technically you need to stay below that.
-      // But the request is about "earning" any grade.
-      // E: just need to show any score — even 0 may qualify.
-      const maxPossible = soFar + EXAM_MAX;
-      const maxPct = (maxPossible / TOTAL_MAX) * 100;
-
+      const maxPct = ((soFar + EXAM_MAX) / TOTAL_MAX) * 100;
       if (maxPct < 60) {
-        // Already guaranteed E
         mainTextEl.textContent = 'You will receive an E regardless of Exam 4.';
         scoreVal.textContent   = 'N/A';
         scoreBox.classList.add('tsb-guaranteed');
-        eqEl.innerHTML = `<strong>Max possible:</strong> (${fmt(soFar,1)} + 100) / 500 = ${fmt(maxPct,1)}% &lt; 60%`;
+        eqEl.innerHTML = `<strong>Max possible:</strong> (${fmt(soFar, 1)} + 100) / 500 = ${fmt(maxPct, 1)}% &lt; 60%`;
         statusBar.classList.add('status-guaranteed');
         statusIcon.textContent = '📌';
         statusText.textContent = 'An E is mathematically guaranteed no matter what you score on Exam 4.';
       } else {
-        // Need to score below a certain amount
-        const maxNeeded = (60 / 100) * TOTAL_MAX - soFar - 0.01; // stay under 60%
-        mainTextEl.textContent = `Score below ${fmt(maxNeeded,1)} pts on Exam 4 to earn an E.`;
+        const maxNeeded = (60 / 100) * TOTAL_MAX - soFar - 0.01;
+        mainTextEl.textContent = `Score below ${fmt(maxNeeded, 1)} pts on Exam 4 to earn an E.`;
         scoreVal.textContent   = fmt(maxNeeded, 1);
         scoreBox.classList.add('tsb-achievable');
-        eqEl.innerHTML = `To stay below 60%: need Exam 4 &lt; <strong>${fmt(maxNeeded,1)}</strong>`;
+        eqEl.innerHTML = `To stay below 60%: need Exam 4 &lt; <strong>${fmt(maxNeeded, 1)}</strong>`;
         statusBar.classList.add('status-achievable');
         statusIcon.textContent = '⚠️';
         statusText.textContent = 'You can still avoid an E by scoring higher on Exam 4.';
@@ -1039,57 +959,49 @@ background-color: white; /* Ensure the iframe has a white background */
       return;
     }
 
-    // Check if already guaranteed (even with 0 on exam 4)
-    const minPossible = soFar + 0;
-    const minPct = (minPossible / TOTAL_MAX) * 100;
+    const minPct = (soFar / TOTAL_MAX) * 100;
     if (minPct >= threshold) {
       mainTextEl.textContent = `You've already secured ${gradeLabel[selectedGrade]}!`;
       scoreVal.textContent   = '0+';
       scoreBox.classList.add('tsb-guaranteed');
-      eqEl.innerHTML = `Even with 0 on Exam 4: ${fmt(soFar,1)} / 500 = ${fmt(minPct,1)}% ≥ ${threshold}%`;
+      eqEl.innerHTML = `Even with 0 on Exam 4: ${fmt(soFar, 1)} / 500 = ${fmt(minPct, 1)}% ≥ ${threshold}%`;
       statusBar.classList.add('status-guaranteed');
       statusIcon.textContent = '🎉';
-      statusText.textContent = `${gradeLabel.charAt ? gradeLabel : gradeLabel[selectedGrade].charAt(0).toUpperCase() + gradeLabel[selectedGrade].slice(1)} is guaranteed — any Exam 4 score will do!`;
       statusText.textContent = `${gradeLabel[selectedGrade].charAt(0).toUpperCase() + gradeLabel[selectedGrade].slice(1)} is guaranteed — any Exam 4 score will do!`;
       return;
     }
 
-    // Check if impossible (even with perfect score on exam 4)
-    const maxPossible = soFar + EXAM_MAX;
-    const maxPct = (maxPossible / TOTAL_MAX) * 100;
+    const maxPct = ((soFar + EXAM_MAX) / TOTAL_MAX) * 100;
     if (maxPct < threshold) {
       mainTextEl.textContent = `It is no longer possible to earn ${gradeLabel[selectedGrade]}.`;
       scoreVal.textContent   = '> 100';
       scoreBox.classList.add('tsb-impossible');
-      eqEl.innerHTML = `Max possible: (${fmt(soFar,1)} + 100) / 500 = ${fmt(maxPct,1)}% &lt; ${threshold}%`;
+      eqEl.innerHTML = `Max possible: (${fmt(soFar, 1)} + 100) / 500 = ${fmt(maxPct, 1)}% &lt; ${threshold}%`;
       statusBar.classList.add('status-impossible');
       statusIcon.textContent = '❌';
       statusText.textContent = `Even a perfect score on Exam 4 won't reach ${threshold}%. Consider a different target.`;
       return;
     }
 
-    // Standard case: show needed score
-    const neededRounded = Math.ceil(needed * 10) / 10; // round up to 1 decimal
+    const needed        = (threshold / 100) * TOTAL_MAX - soFar;
+    const neededRounded = Math.ceil(needed * 10) / 10;
     mainTextEl.textContent = `You need ${fmt(neededRounded, 1)} points on Exam 4 to earn ${gradeLabel[selectedGrade]}.`;
     scoreVal.textContent   = fmt(neededRounded, 1);
     scoreBox.classList.add('tsb-achievable');
 
-    // Equation
-    const finalPctIfPerfect = ((soFar + EXAM_MAX) / TOTAL_MAX * 100);
+    const finalPctIfPerfect = ((soFar + EXAM_MAX) / TOTAL_MAX) * 100;
     eqEl.innerHTML =
-      `(${fmt(soFar,1)} + <strong>x</strong>) / 500 ≥ ${threshold}% &nbsp;→&nbsp; <strong>x ≥ ${fmt(neededRounded,1)}</strong><br>` +
-      `With 100 on Exam 4: ${fmt(finalPctIfPerfect,1)}% — max possible`;
+      `(${fmt(soFar, 1)} + <strong>x</strong>) / 500 ≥ ${threshold}% &nbsp;→&nbsp; <strong>x ≥ ${fmt(neededRounded, 1)}</strong><br>` +
+      `With 100 on Exam 4: ${fmt(finalPctIfPerfect, 1)}% — max possible`;
 
     statusBar.classList.add('status-achievable');
-    const pctNeeded = (neededRounded / EXAM_MAX) * 100;
     statusIcon.textContent = '✅';
-    statusText.textContent = `You need ${fmt(pctNeeded,1)}% on Exam 4 (${fmt(neededRounded,1)}/100 points) to earn ${gradeLabel[selectedGrade]}.`;
+    statusText.textContent = `You need ${fmt((neededRounded / EXAM_MAX) * 100, 1)}% on Exam 4 (${fmt(neededRounded, 1)}/100 points) to earn ${gradeLabel[selectedGrade]}.`;
   }
 
-  /* ── Init bars on page load ─────────────────────── */
-  (function initBars() {
-    const inputs = ['exam1','exam2','exam3','assign1','assign2','assign3','assign4'];
-    const types  = ['exam','exam','exam','assign','assign','assign','assign'];
+  (function init() {
+    const inputs = ['exam1', 'exam2', 'exam3', 'assign1', 'assign2', 'assign3', 'assign4'];
+    const types  = ['exam', 'exam', 'exam', 'assign', 'assign', 'assign', 'assign'];
     inputs.forEach((id, i) => {
       const el = document.getElementById(id);
       if (el && el.value !== '') handleInput(el, types[i]);
@@ -1098,6 +1010,9 @@ background-color: white; /* Ensure the iframe has a white background */
 
 })();
 </script>
+
+<!-- ══════════ MAYA CHATBOT (JotForm Agent) ══════════ -->
+<script src='https://cdn.jotfor.ms/agent/embedjs/019ecc14394d712b809ae059679ed85ac3ab/embed.js'></script>
 
 </body>
 </html>
